@@ -38,11 +38,24 @@ function buildQuiz() {
   // finally combine our output list into one string of HTML and put it on the page
   quizContainer.innerHTML = output.join('');
 }
+  
+function getAnswerList() {
+  
+  if (localStorage.getItem('userAnswerList') === null) {
+    userAnswerList = {};
+  } else {
+    userAnswerList = JSON.parse(localStorage.getItem('userAnswerList'));
+    n = Object.keys(userAnswerList).length
+    showSlide(n);
+  }
+  return userAnswerList;
+}
 
 function analyseAnswer(userAnswer) {
-  
-  let questionNumber = currentSlide + 1
-  userAnswerList[`question ${questionNumber}`] = userAnswer
+  console.log(userAnswerList)
+  questionNumber = currentSlide + 1;
+  userAnswerList[`question ${questionNumber}`] = userAnswer;
+  localStorage.setItem('userAnswerList', JSON.stringify(userAnswerList));
   
   if (questionNumber == 2 && userAnswer != "a" && userAnswer != "b") {
     showNextSlide()
@@ -53,10 +66,10 @@ function analyseAnswer(userAnswer) {
   if (questionNumber == 8 && userAnswerList[1] == "c") {
     showNextSlide()
   }
-  console.log(userAnswerList)
+  // console.log(userAnswerList)
   questionNumber == myQuestions.length? executeRedirection() : showNextSlide()
 }
-  
+
 function executeRedirection() {
   if (userAnswerList["question 2"] == "c") {
     window.location.href = "https://www.explicitdevelopers.com/bfb"
@@ -74,15 +87,14 @@ function executeRedirection() {
   if (userAnswerList["question 2"] == "b" && userAnswerList["question 3"]== "b") {
     window.location.href = "https://www.explicitdevelopers.com/bft"
   }
-  
+  localStorage.removeItem('userAnswerList')
 }
 
 function showSlide(n) {
-
   slides[currentSlide].classList.remove('active-slide');
   slides[n].classList.add('active-slide');
   currentSlide = n;
-
+  
   let progress = Math.floor(((currentSlide + 1) / myQuestions.length) * 100)
   progressBar.style.width = `${progress}%`;
   progressBar.innerHTML = `${progress}%`
@@ -96,10 +108,10 @@ function checkForCheckedInput(currentSlide){
         analyseAnswer(label.firstElementChild.value)
       }
     }
-}
+  }
   
-
-function showNextSlide() {
+  
+  function showNextSlide() {
   showSlide(currentSlide + 1);
 }
 
@@ -206,18 +218,19 @@ const previousButton = document.getElementById("previous");
 const nextButton = document.getElementById("next");
 const slides = document.querySelectorAll(".slide");
 let currentSlide = 0;
-const userAnswerList = {};
+let questionNumber;
+let userAnswerList;
+
 // Show the first slide
-  showSlide(currentSlide);
- 
+showSlide(currentSlide);
+
 
 // Event listeners
 // submitButton.addEventListener('click', showResults);
 // previousButton.addEventListener("click", showPreviousSlide);
 // nextButton.addEventListener("click", showNextSlide);
-  quiz.addEventListener("click", () => {
-    checkForCheckedInput(slides[currentSlide]);
+quiz.addEventListener("click", () => {
+  checkForCheckedInput(slides[currentSlide]);
   });
-}) ();
-
-
+document.addEventListener('DOMContentLoaded', getAnswerList)
+})();
